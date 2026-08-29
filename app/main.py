@@ -82,7 +82,24 @@ def get_doctors(
 
     return response.data
 
+@app.get("/doctors/by-name")
+def get_doctor_by_name(name: str):
 
+    response = (
+        supabase
+        .table("doctors")
+        .select("*")
+        .ilike("name", name)
+        .execute()
+    )
+
+    if not response.data:
+        raise HTTPException(
+            status_code=404,
+            detail="Doctor not found"
+        )
+
+    return response.data[0]
 # ============================================================
 # GET AVAILABLE SLOTS
 # ============================================================
