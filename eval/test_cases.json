@@ -1,0 +1,189 @@
+[
+  {
+    "id": "health_check",
+    "category": "health",
+    "name": "Health check",
+    "description": "Verify that the deployed backend is healthy and responding.",
+    "expected": {
+      "http_status": 200,
+      "status": "ok"
+    }
+  },
+  {
+    "id": "doctor_lookup",
+    "category": "doctors",
+    "name": "Get all doctors",
+    "description": "Verify that the API returns real doctors from the database.",
+    "expected": {
+      "http_status": 200,
+      "has_doctors": true,
+      "valid_doctor_structure": true
+    }
+  },
+  {
+    "id": "department_filter",
+    "category": "doctors",
+    "name": "Get doctors by department",
+    "description": "Verify that doctors can be filtered by a real department.",
+    "input": {
+      "department": "Cardiology"
+    },
+    "expected": {
+      "http_status": 200,
+      "has_doctors": true,
+      "all_match_department": true
+    }
+  },
+  {
+    "id": "unknown_department",
+    "category": "doctors",
+    "name": "Unknown department",
+    "description": "Verify that an unknown department returns no doctors instead of fabricated results.",
+    "input": {
+      "department": "NonexistentDepartment"
+    },
+    "expected": {
+      "http_status": 200,
+      "has_doctors": false
+    }
+  },
+  {
+    "id": "availability",
+    "category": "availability",
+    "name": "Valid doctor availability",
+    "description": "Verify that the API returns real available slots for a real doctor on a future working day.",
+    "input": {
+      "doctor_id": 9
+    },
+    "expected": {
+      "http_status": 200,
+      "has_available_slots": true
+    }
+  },
+  {
+    "id": "invalid_doctor_availability",
+    "category": "availability",
+    "name": "Invalid doctor availability",
+    "description": "Verify that an unknown doctor ID is rejected.",
+    "input": {
+      "doctor_id": 9999
+    },
+    "expected": {
+      "http_status": 400
+    }
+  },
+  {
+    "id": "booking",
+    "category": "booking",
+    "name": "Successful booking",
+    "description": "Book a real available slot using a unique evaluation patient and verify the appointment in the database.",
+    "input": {
+      "doctor_id": 9,
+      "patient_name": "Eval Test Patient"
+    },
+    "expected": {
+      "http_status": 200,
+      "booking_success": true,
+      "appointment_id": "integer",
+      "status": "booked"
+    }
+  },
+  {
+    "id": "booking_conflict",
+    "category": "booking",
+    "name": "Duplicate active slot",
+    "description": "Attempt to book the same active doctor/date/time using another patient and verify that the conflict is rejected.",
+    "input": {
+      "doctor_id": 9,
+      "patient_name": "Eval Conflict Patient"
+    },
+    "expected": {
+      "http_status": 409,
+      "slot_unavailable": true
+    }
+  },
+  {
+    "id": "invalid_doctor_booking",
+    "category": "booking",
+    "name": "Invalid doctor booking",
+    "description": "Attempt to book using a nonexistent doctor ID and verify that the backend rejects the request.",
+    "input": {
+      "doctor_id": 9999
+    },
+    "expected": {
+      "http_status": 400
+    }
+  },
+  {
+    "id": "invalid_appointment_time",
+    "category": "booking",
+    "name": "Invalid appointment time",
+    "description": "Attempt to book outside the selected doctor's working hours and verify that the backend rejects the request.",
+    "input": {
+      "doctor_id": 9,
+      "time": "18:00"
+    },
+    "expected": {
+      "http_status": 400
+    }
+  },
+  {
+    "id": "appointment_lookup",
+    "category": "appointments",
+    "name": "Get patient appointments",
+    "description": "Verify that an active evaluation appointment can be retrieved using the patient's phone number.",
+    "expected": {
+      "http_status": 200,
+      "has_appointments": true
+    }
+  },
+  {
+    "id": "reschedule",
+    "category": "rescheduling",
+    "name": "Successful reschedule",
+    "description": "Move the evaluation appointment to another real available slot and verify both old and new appointment states.",
+    "expected": {
+      "http_status": 200,
+      "reschedule_success": true,
+      "old_status": "rescheduled",
+      "new_status": "booked"
+    }
+  },
+  {
+    "id": "invalid_reschedule",
+    "category": "rescheduling",
+    "name": "Reschedule nonexistent appointment",
+    "description": "Verify that rescheduling a nonexistent appointment fails safely.",
+    "input": {
+      "patient_phone": "9999999998",
+      "appointment_id": 999999999
+    },
+    "expected": {
+      "http_status": 404
+    }
+  },
+  {
+    "id": "cancellation",
+    "category": "cancellation",
+    "name": "Cancel active appointment",
+    "description": "Cancel the active evaluation appointment and verify that its database status becomes cancelled.",
+    "expected": {
+      "http_status": 200,
+      "cancel_success": true,
+      "status": "cancelled"
+    }
+  },
+  {
+    "id": "invalid_cancellation",
+    "category": "cancellation",
+    "name": "Cancel nonexistent appointment",
+    "description": "Verify that cancellation fails safely when no active appointment exists.",
+    "input": {
+      "patient_phone": "9999999997",
+      "appointment_id": 999999999
+    },
+    "expected": {
+      "http_status": 404
+    }
+  }
+]
